@@ -2,76 +2,17 @@ package logger
 
 import (
 	"log"
+	"regexp"
 	"strings"
 	"testing"
 )
 
-func TestNew(t *testing.T) {
-	t.Run("Default Log Prefix", func(t *testing.T) {
-		var prefix string
-		writer := strings.Builder{}
-		logger_ := New(&writer)
-
-		prefix = "[ERROR] "
-		if logger_.error.Prefix() != prefix {
-			t.Errorf("Unexpected logger.error.Prefix(). expected: '%s', received: '%s'",
-				prefix, logger_.error.Prefix())
-		}
-
-		prefix = "[INFO ] "
-		if logger_.info.Prefix() != prefix {
-			t.Errorf("Unexpected logger.info.Prefix(). expected: '%s', received: '%s'",
-				prefix, logger_.info.Prefix())
-		}
-
-		prefix = "[WARN ] "
-		if logger_.warn.Prefix() != prefix {
-			t.Errorf("Unexpected logger.warn.Prefix(). expected: '%s', received: '%s'",
-				prefix, logger_.warn.Prefix())
-		}
-
-		prefix = "[DEBUG] "
-		if logger_.debug.Prefix() != prefix {
-			t.Errorf("Unexpected logger.debug.Prefix(). expected: '%s', received: '%s'",
-				prefix, logger_.debug.Prefix())
-		}
-	})
-
-	t.Run("Default Log Flags", func(t *testing.T) {
-		format := log.Ldate | log.Ltime | log.Llongfile
-		writer := strings.Builder{}
-		logger_ := New(&writer)
-
-		if logger_.error.Flags() != format {
-			t.Errorf("Unexpected logger.error.Flags(). expected: '%d', received: '%d'",
-				format, logger_.error.Flags())
-		}
-
-		if logger_.info.Flags() != format {
-			t.Errorf("Unexpected logger.info.Flags(). expected: '%d', received: '%d'",
-				format, logger_.info.Flags())
-		}
-
-		if logger_.warn.Flags() != format {
-			t.Errorf("Unexpected logger.warn.Flags(). expected: '%d', received: '%d'",
-				format, logger_.warn.Flags())
-		}
-
-		if logger_.debug.Flags() != format {
-			t.Errorf("Unexpected logger.debug.Flags(). expected: '%d', received: '%d'",
-				format, logger_.debug.Flags())
-		}
-	})
-}
-
-func TestSetOutput(t *testing.T) {
-	oldWriter := strings.Builder{}
+func TestDefaultLoggerSetOutput(t *testing.T) {
 	newWriter := strings.Builder{}
-	logger_ := New(&oldWriter)
-	logger_.SetLevel(LvDebug)
-	logger_.SetFlags(0)
+	SetLevel(LvDebug)
+	SetFlags(0)
 
-	logger_.SetOutput(&newWriter)
+	SetOutput(&newWriter)
 	expects := leadingWhitespace.ReplaceAllString(
 		`[ERROR] error
 		 [WARN ] warn
@@ -80,20 +21,16 @@ func TestSetOutput(t *testing.T) {
 		`,
 		"",
 	)
-	logger_.Error("error")
-	logger_.Warn("warn")
-	logger_.Info("info")
-	logger_.Debug("debug")
-	if oldWriter.String() != "" {
-		t.Errorf("oldWriter was written to")
-	}
+	Error("error")
+	Warn("warn")
+	Info("info")
+	Debug("debug")
 	if newWriter.String() != expects {
 		t.Errorf("newWriter did not receive expected logs\nexpected:\n'%s'\nreceived:'%s'", expects, newWriter.String())
 	}
-
 }
 
-func TestLogger(t *testing.T) {
+func TestDefaultLogger(t *testing.T) {
 	t.Run("SetLevel works with Regular Logs", func(t *testing.T) {
 		tcases := []struct {
 			test  string
@@ -152,14 +89,14 @@ func TestLogger(t *testing.T) {
 		for _, tcase := range tcases {
 			t.Run(tcase.test, func(t *testing.T) {
 				writer := strings.Builder{}
-				logger_ := New(&writer)
-				logger_.SetFlags(0)
+				SetOutput(&writer)
+				SetFlags(0)
 
-				logger_.SetLevel(tcase.level)
-				logger_.Error("error")
-				logger_.Warn("warn")
-				logger_.Info("info")
-				logger_.Debug("debug")
+				SetLevel(tcase.level)
+				Error("error")
+				Warn("warn")
+				Info("info")
+				Debug("debug")
 				if writer.String() != tcase.logs {
 					t.Errorf("Log Messages do not match.\nExpected:\n'%s'\nReceived:\n'%s'", tcase.logs, writer.String())
 				}
@@ -167,7 +104,6 @@ func TestLogger(t *testing.T) {
 		}
 
 	})
-
 	t.Run("SetLevel works with Format Logs", func(t *testing.T) {
 		tcases := []struct {
 			test  string
@@ -226,17 +162,43 @@ func TestLogger(t *testing.T) {
 		for _, tcase := range tcases {
 			t.Run(tcase.test, func(t *testing.T) {
 				writer := strings.Builder{}
-				logger_ := New(&writer)
-				logger_.SetLevel(tcase.level)
-				logger_.SetFlags(0)
-				logger_.Errorf("error: %s", "foo")
-				logger_.Warnf("warn: %s", "foo")
-				logger_.Infof("info: %s", "foo")
-				logger_.Debugf("debug: %s", "foo")
+				SetOutput(&writer)
+				SetLevel(tcase.level)
+				SetFlags(0)
+				Errorf("error: %s", "foo")
+				Warnf("warn: %s", "foo")
+				Infof("info: %s", "foo")
+				Debugf("debug: %s", "foo")
 				if writer.String() != tcase.logs {
 					t.Errorf("Log Messages do not match.\nExpected:\n'%s'\nReceived:\n'%s'", tcase.logs, writer.String())
 				}
 			})
+		}
+	})
+
+	t.Run("References file that logged message", func(t *testing.T) {
+		writer := strings.Builder{}
+		SetOutput(&writer)
+		SetLevel(LvDebug)
+		SetFlags(log.Lshortfile)
+		Error("error")
+		Warn("warn")
+		Info("info")
+		Debug("debug")
+		output := writer.String()
+
+		prefixRx := regexp.MustCompile(`(?m)(^\s*\[[a-zA-Z ]+\] )`)
+		output = prefixRx.ReplaceAllString(output, "")
+
+		shortfileRx := regexp.MustCompile(`^default_test.go:[0-9]+: `)
+		lines := strings.Split(output, "\n")
+		for _, line := range lines {
+			if line == "" {
+				continue
+			}
+			if !shortfileRx.MatchString(line) {
+				t.Errorf("Does not use log-caller's callstack. Received: %s", line)
+			}
 		}
 	})
 }
