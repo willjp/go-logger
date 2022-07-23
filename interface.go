@@ -6,6 +6,8 @@ type Interface interface {
 	SetLevel(level LogLevel)
 	SetOutput(w io.Writer)
 	SetFlags(flags int)
+	Flags() int
+	Level() LogLevel
 	Debug(v ...interface{})
 	Info(v ...interface{})
 	Warn(v ...interface{})

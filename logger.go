@@ -8,6 +8,7 @@ import (
 
 type Logger struct {
 	level LogLevel
+	flags int
 	error *log.Logger
 	info  *log.Logger
 	warn  *log.Logger
@@ -16,14 +17,21 @@ type Logger struct {
 
 // Create a new custom Logger
 func New(writer io.Writer) Logger {
-	format := log.Ldate | log.Ltime | log.Llongfile
 	return Logger{
-		level: LvWarn,
-		error: log.New(writer, "[ERROR] ", format),
-		info:  log.New(writer, "[INFO ] ", format),
-		warn:  log.New(writer, "[WARN ] ", format),
-		debug: log.New(writer, "[DEBUG] ", format),
+		level: defaultLogLevel,
+		error: log.New(writer, "[ERROR] ", defaultLogFlags),
+		info:  log.New(writer, "[INFO ] ", defaultLogFlags),
+		warn:  log.New(writer, "[WARN ] ", defaultLogFlags),
+		debug: log.New(writer, "[DEBUG] ", defaultLogFlags),
 	}
+}
+
+func (l *Logger) Flags() int {
+	return l.flags
+}
+
+func (l *Logger) Level() LogLevel {
+	return l.level
 }
 
 func (l *Logger) SetLevel(level LogLevel) {
@@ -38,6 +46,7 @@ func (l *Logger) SetOutput(w io.Writer) {
 }
 
 func (l *Logger) SetFlags(flags int) {
+	l.flags = flags
 	l.error.SetFlags(flags)
 	l.info.SetFlags(flags)
 	l.warn.SetFlags(flags)

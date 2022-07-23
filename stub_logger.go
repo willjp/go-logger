@@ -17,14 +17,22 @@ type StubLogger struct {
 }
 
 func NewStubLogger() StubLogger {
-	// format := log.Ldate | log.Ltime | log.Llongfile
 	return StubLogger{
-		level:     LvWarn,
+		level:     defaultLogLevel,
+		flags:     defaultLogFlags,
 		ErrorMsgs: []string{},
 		InfoMsgs:  []string{},
 		WarnMsgs:  []string{},
 		DebugMsgs: []string{},
 	}
+}
+
+func (l *StubLogger) Flags() int {
+	return l.flags
+}
+
+func (l *StubLogger) Level() LogLevel {
+	return l.level
 }
 
 func (l *StubLogger) SetLevel(level LogLevel) {

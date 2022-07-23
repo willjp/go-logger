@@ -15,6 +15,20 @@ func TestStubLoggerImplementsInterface(t *testing.T) {
 	}
 }
 
+func TestStubLoggerFlags(t *testing.T) {
+	logger_ := NewStubLogger()
+	if defaultLogFlags != logger_.Flags() {
+		t.Errorf("Expected '%d', Received '%d'", defaultLogFlags, logger_.Flags())
+	}
+}
+
+func TestStubLoggerLevel(t *testing.T) {
+	logger_ := NewStubLogger()
+	if defaultLogLevel != logger_.Level() {
+		t.Errorf("Expected '%d', Received '%d'", defaultLogLevel, logger_.Level())
+	}
+}
+
 func TestLogMessagesRecorded(t *testing.T) {
 	t.Run("Debug", func(t *testing.T) {
 		logger_ := NewStubLogger()
