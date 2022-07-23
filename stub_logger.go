@@ -16,9 +16,11 @@ type StubLogger struct {
 	DebugMsgs []string
 }
 
+// Creates a StubLogger
+// Since this will most likely be used to test for log messages, it is created with the highest possible loglevel (all messages will be written).
 func NewStubLogger() StubLogger {
 	return StubLogger{
-		level:     defaultLogLevel,
+		level:     LvDebug,
 		flags:     defaultLogFlags,
 		ErrorMsgs: []string{},
 		InfoMsgs:  []string{},

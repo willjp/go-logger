@@ -24,8 +24,8 @@ func TestStubLoggerFlags(t *testing.T) {
 
 func TestStubLoggerLevel(t *testing.T) {
 	logger_ := NewStubLogger()
-	if defaultLogLevel != logger_.Level() {
-		t.Errorf("Expected '%d', Received '%d'", defaultLogLevel, logger_.Level())
+	if LvDebug != logger_.Level() {
+		t.Errorf("Expected '%d', Received '%d'", LvDebug, logger_.Level())
 	}
 }
 
