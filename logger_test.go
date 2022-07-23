@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func TestInterfaceMember(t *testing.T) {
+	belongsToInterface := func(Interface) bool {
+		return true
+	}
+	writer := strings.Builder{}
+	logger_ := New(&writer)
+	if !belongsToInterface(&logger_) {
+		t.Error("Logger does not conform to Interface")
+	}
+}
+
 func TestNew(t *testing.T) {
 	t.Run("Default Log Prefix", func(t *testing.T) {
 		var prefix string
