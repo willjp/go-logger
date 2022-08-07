@@ -1,3 +1,3 @@
 module willpittman.net/x/logger
 
-go 1.18
+go 1.19
