@@ -2,8 +2,19 @@
 logger
 ======
 
-Simple levelled log library with no dependencies.
-Go's builtin logger is goroutine-safe, and therefore so is this library.
+Simple threadsafe logger interface supporting loglevels with no depencencies.
+
+* `Logger` logs to a Writable
+* `StubLogger` is for testing, and instead appends messages to an array
+
+
+Install
+-------
+
+.. code-block:: bash
+
+    # within your go project root
+    go get github.com/willjp/go-logger
 
 
 Usage
@@ -16,7 +27,7 @@ A default logsetup logs to stderr. You can use the following.
 
 .. code-block:: go
 
-    import "willpittman.net/x/logger"
+    import "github.com/willjp/go-logger"
 
     logger.SetLevel(log.LvDebug)
     logger.Error("error msg")
@@ -29,14 +40,14 @@ You can also create your own loggers if you'd like.
 
 .. code-block:: go
 
-    import "willpittman.net/x/logger"
+    import "github.com/willjp/go-logger"
 
-    # create logger
+    // create logger
     logfile = os.Create("foo.log")
     defer logfile.Close()
     log = logger.New(logfile)
 
-    # use logger
+    // use logger
     log.SetLevel(log.LvDebug)
     log.Error("error msg")
     log.Warn("warn msg")
@@ -58,7 +69,7 @@ LogMessages are appended to a array fields on the struct - a separate array for 
     package log
     import (
         "os"
-        "willpittman.net/x/logger"
+        "github.com/willjp/go-logger"
     )
 
     var Log logger.Interface

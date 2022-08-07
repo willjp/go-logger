@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"willpittman.net/x/logger/internal/spinlock"
+	"github.com/willjp/go-logger/internal/spinlock"
 )
 
 // StubLogger records the strings that were logged to each log-level.
